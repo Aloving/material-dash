@@ -113,7 +113,10 @@ const mornings = {
 
 const DefaultText = `{morning} {dayTime}! Меня зовут Дарья, сегодня у нас запланирован урок в {time}! Пожалуйста, проверьте наушники, микрофон, камеру, установлен ли браузер Google Сhrome. 
 
-Для того, чтобы начать урок, нужно перейти по ссылке ниже на нашу образовательную платформу. Ссылку открыть в Google Chrome браузере и предоставить доступ к камере и микрофону.`;
+Для того, чтобы начать урок, нужно перейти по ссылке ниже на нашу образовательную платформу. Ссылку открыть в Google Chrome браузере и предоставить доступ к камере и микрофону.
+
+{link}
+`;
 
 class AppComponent extends Component {
     constructor(props) {
@@ -125,7 +128,8 @@ class AppComponent extends Component {
 		this.state = {
 			dayTime: dayTimeIntervals.getDayTime(anHour),
 			text: DefaultText,
-			time: `${anHour}:00`
+			time: `${anHour}:00`,
+			link: '',
 		};
 	}
 
@@ -135,7 +139,8 @@ class AppComponent extends Component {
         return text
             .replace('{morning}', mornings[this.state.dayTime])
             .replace('{dayTime}', daysConsts[this.state.dayTime])
-            .replace('{time}', this.state.time);
+			.replace('{time}', this.state.time)
+			.replace('{link}', this.state.link);
     }
 
     render() {
@@ -169,29 +174,40 @@ class AppComponent extends Component {
                     </Select>
                 </FormControl>
 				<FormControl className={classes.formControl}>
+					<TextField
+						id="the-link"
+						label="Link"
+						className={classes.formControl}
+						value={this.state.link}
+						onChange={(e) => this.setState({link: e.target.value})}
+					/>
+                </FormControl>
+				<FormControl className={classes.formControl}>
 					<InputLabel htmlFor="time">Time</InputLabel>
-					<Select
-						value={this.state.time}
-						onChange={(event) => {
-							this.setState(({[event.target.name]: event.target.value}))
-                        }}
-						inputProps={{
-							name: 'time',
-							id: 'time'
-						}}
-						variant='standard'
-					>
-                        {
-                            times.map((time, i) => {
-                                return (
-									<MenuItem value={time} key={i}>
-                                        {time}
-									</MenuItem>
-                                )
-                            })
-                        }
-					</Select>
-
+						<Select
+							value={this.state.time}
+							onChange={(event) => {
+								this.setState(({[event.target.name]: event.target.value}))
+							}}
+							inputProps={{
+								name: 'time',
+								id: 'time'
+							}}
+							className={classes.formControl}
+							variant='standard'
+						>
+							{
+								times.map((time, i) => {
+									return (
+										<MenuItem value={time} key={i}>
+											{time}
+										</MenuItem>
+									)
+								})
+							}
+						</Select>
+				</FormControl>
+				<FormControl className={classes.formControl}>
 					<TextField
 						id="outlined-multiline-flexible"
 						label="Текст письма"
