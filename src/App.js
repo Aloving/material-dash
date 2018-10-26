@@ -130,6 +130,7 @@ class AppComponent extends Component {
 			text: DefaultText,
 			time: `${anHour}:00`,
 			link: '',
+			generatedText: ''
 		};
 	}
 
@@ -193,7 +194,6 @@ class AppComponent extends Component {
 								name: 'time',
 								id: 'time'
 							}}
-							className={classes.formControl}
 							variant='standard'
 						>
 							{
@@ -223,8 +223,28 @@ class AppComponent extends Component {
 						margin="normal"
 						variant="standard"
 					/>
+					{
+						this.state.generatedText &&
+						<TextField
+							id="outlined-multiline-flexible"
+							label="Сгенерированное письмо"
+							multiline
+							rowsMax="10"
+							value={this.state.generatedText}
+							className={classes.textField}
+							margin="normal"
+							variant="standard"
+						/>
+					}
                     <CopyToClipboard text={this.generateText()}>
-                        <Button size='medium' color='primary' variant='contained'>
+                        <Button
+							size='medium'
+							color='primary'
+							variant='contained'
+							onClick={() => {
+								this.setState({generatedText: this.generateText()})
+							}}
+						>
                             Generate it
                         </Button>
                     </CopyToClipboard>
