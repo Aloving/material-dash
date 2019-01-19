@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import Cookies from 'js-cookie';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -111,7 +112,7 @@ const mornings = {
 	evening: 'Добрый'
 };
 
-const DefaultText = `{morning} {dayTime}! Меня зовут Дарья, сегодня у нас запланирован урок в {time}! Пожалуйста, проверьте наушники, микрофон, камеру, установлен ли браузер Google Сhrome. 
+const DefaultText = Cookies.get('cookie-text') || `{morning} {dayTime}! Меня зовут Дарья, сегодня у нас запланирован урок в {time}! Пожалуйста, проверьте наушники, микрофон, камеру, установлен ли браузер Google Сhrome. 
 
 Для того, чтобы начать урок, нужно перейти по ссылке ниже на нашу образовательную платформу. Ссылку открыть в Google Chrome браузере и предоставить доступ к камере и микрофону.
 
@@ -130,8 +131,21 @@ class AppComponent extends Component {
 			text: DefaultText,
 			time: `${anHour}:00`,
 			link: '',
-			generatedText: ''
+			generatedText: '',
+			cookieSaved: false,
 		};
+
+		this.saveToCookie = this.saveToCookie.bind(this);
+	}
+
+	saveToCookie() {
+		Cookies.set('cookie-text', this.state.text);
+		this.setState(
+			{
+				cookieSaved: true,
+			},
+			() => setTimeout(() => this.setState({cookieSaved: false}), 2000),	
+		)
 	}
 
     generateText() {
@@ -149,106 +163,140 @@ class AppComponent extends Component {
 
         return (
             <div className="App">
-				<FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="day-time">DayTime</InputLabel>
-                    <Select
-                        value={this.state.dayTime}
-                        onChange={(event) => {
-							this.setState(({[event.target.name]: event.target.value}))
-                        }}
-                        inputProps={{
-                            name: 'dayTime',
-                            id: 'day-time'
-                        }}
-                    >
-						<MenuItem value="morning">
-							Утро
-						</MenuItem>
-
-                        <MenuItem value="day">
-                            День
-                        </MenuItem>
-
-						<MenuItem value="evening">
-							Вечер
-						</MenuItem>
-                    </Select>
-                </FormControl>
-				<FormControl className={classes.formControl}>
-					<TextField
-						id="the-link"
-						label="Link"
-						className={classes.formControl}
-						value={this.state.link}
-						onChange={(e) => this.setState({link: e.target.value})}
-					/>
-                </FormControl>
-				<FormControl className={classes.formControl}>
-					<InputLabel htmlFor="time">Time</InputLabel>
+				<div style={{display: 'inline-block'}}>
+					<FormControl className={classes.formControl}>
+						<InputLabel htmlFor="day-time">DayTime</InputLabel>
 						<Select
-							value={this.state.time}
+							value={this.state.dayTime}
 							onChange={(event) => {
 								this.setState(({[event.target.name]: event.target.value}))
 							}}
 							inputProps={{
-								name: 'time',
-								id: 'time'
+								name: 'dayTime',
+								id: 'day-time'
 							}}
-							variant='standard'
 						>
-							{
-								times.map((time, i) => {
-									return (
-										<MenuItem value={time} key={i}>
-											{time}
-										</MenuItem>
-									)
-								})
-							}
+							<MenuItem value="morning">
+								Утро
+							</MenuItem>
+
+							<MenuItem value="day">
+								День
+							</MenuItem>
+
+							<MenuItem value="evening">
+								Вечер
+							</MenuItem>
 						</Select>
-				</FormControl>
-				<FormControl className={classes.formControl}>
-					<TextField
-						id="outlined-multiline-flexible"
-						label="Текст письма"
-						multiline
-						rowsMax="10"
-						value={this.state.text}
-						onChange={(event) => {
-						    this.setState({
-                                text: event.target.value
-                            })
-                        }}
-						className={classes.textField}
-						margin="normal"
-						variant="standard"
-					/>
-					{
-						this.state.generatedText &&
+					</FormControl>
+					<FormControl className={classes.formControl}>
+						<TextField
+							id="the-link"
+							label="Link"
+							className={classes.formControl}
+							value={this.state.link}
+							onChange={(e) => this.setState({link: e.target.value})}
+						/>
+					</FormControl>
+					<FormControl className={classes.formControl}>
+						<InputLabel htmlFor="time">Time</InputLabel>
+							<Select
+								value={this.state.time}
+								onChange={(event) => {
+									this.setState(({[event.target.name]: event.target.value}))
+								}}
+								inputProps={{
+									name: 'time',
+									id: 'time'
+								}}
+								variant='standard'
+							>
+								{
+									times.map((time, i) => {
+										return (
+											<MenuItem value={time} key={i}>
+												{time}
+											</MenuItem>
+										)
+									})
+								}
+							</Select>
+					</FormControl>
+					<div>
+						<FormControl className={classes.formControl}>
+							<TextField
+								id="outlined-multiline-flexible"
+								label="Текст письма в cookie"
+								multiline
+								rowsMax="10"
+								value={this.state.text}
+								onChange={(event) => {
+									this.setState({
+										text: event.target.value
+									})
+								}}
+								className={classes.textField}
+								margin="normal"
+								variant="standard"
+							/>
+							<Button
+								size='medium'
+								color='primary'
+								variant='contained'
+								onClick={this.saveToCookie}
+							>
+								Save to cookie
+							</Button>
+							{
+								this.state.cookieSaved && <div>text is saved</div>
+							}
+						</FormControl>
+					</div>
+				</div>
+				<div style={{display: 'inline-block'}}>
+					<FormControl className={classes.formControl}>
 						<TextField
 							id="outlined-multiline-flexible"
-							label="Сгенерированное письмо"
+							label="Текст письма"
 							multiline
 							rowsMax="10"
-							value={this.state.generatedText}
+							value={this.state.text}
+							onChange={(event) => {
+								this.setState({
+									text: event.target.value
+								})
+							}}
 							className={classes.textField}
 							margin="normal"
 							variant="standard"
 						/>
-					}
-                    <CopyToClipboard text={this.generateText()}>
-                        <Button
-							size='medium'
-							color='primary'
-							variant='contained'
-							onClick={() => {
-								this.setState({generatedText: this.generateText()})
-							}}
-						>
-                            Generate it
-                        </Button>
-                    </CopyToClipboard>
-                </FormControl>
+						{
+							this.state.generatedText &&
+							<TextField
+								id="outlined-multiline-flexible"
+								label="Сгенерированное письмо"
+								multiline
+								rowsMax="10"
+								value={this.state.generatedText}
+								className={classes.textField}
+								margin="normal"
+								variant="standard"
+							/>
+						}
+						<CopyToClipboard text={this.generateText()}>
+							<Button
+								size='medium'
+								color='primary'
+								variant='contained'
+								onClick={() => {
+									this.setState({generatedText: this.generateText()})
+								}}
+							>
+								Generate it
+							</Button>
+						</CopyToClipboard>
+					</FormControl>
+				</div>
           </div>
         );
     }
